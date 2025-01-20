@@ -2,6 +2,7 @@ from aws_cdk import (
     # Duration,
     Stack,
     # aws_sqs as sqs,
+    aws_iam
 )
 from constructs import Construct
 from aws_cdk.aws_apigateway import RestApi, Cors
@@ -48,6 +49,21 @@ class TemplateStack(Stack):
 
         self.lambda_stack = LambdaStack(self, api_gateway_resource=api_gateway_resource,
                                         environment_variables=ENVIRONMENT_VARIABLES)
+        
+        s3_admin_policy = aws_iam.PolicyStatement(
+            effect=aws_iam.Effect.ALLOW,
+            actions=[
+                "s3:*",
+            ],
+            resources=[
+                "*"
+            ]
+        )
+
+        for f in self.lambda_stack.functions_that_need_s3_permissions:
+            f.add_to_role_policy(s3_admin_policy)
+        
+
 
 
 
